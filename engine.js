@@ -1,49 +1,38 @@
 const cache = new Map();
 
 /**
- * MAIN ENGINE v3 (ALL-IN-ONE)
+ * MAIN AI ENGINE
  */
 async function getAIResponse(query) {
     const q = query.toLowerCase().trim();
 
-    // 1. CACHE (FASTEST LAYER)
-    if (cache.has(q)) {
-        return cache.get(q) + " (cached)";
-    }
+    // CACHE
+    if (cache.has(q)) return cache.get(q) + " (cached)";
 
-    // 2. LOCAL KNOWLEDGE BASE (OFFLINE INTELLIGENCE)
+    // 1. LOCAL KB
     const local = getLocalAnswer(q);
     if (local) {
         cache.set(q, local);
         return local;
     }
 
-    // 3. RUN APIs IN PARALLEL (WIKIPEDIA + DUCKDUCKGO)
-    const result = await Promise.race([
-        fetchWikipedia(q),
-        fetchDuckDuckGo(q),
-        timeout(4000)
-    ]);
-
-    // 4. VALID RESPONSE CHECK
-    if (result && result.text) {
-        const finalText = result.text + `\n\nConfidence: ${result.confidence}%`;
-        cache.set(q, finalText);
-        return finalText;
+    // 2. RUN APIs (IMPORTANT FIX: sequential fallback)
+    let wiki = await fetchWikipedia(q);
+    if (wiki) {
+        cache.set(q, wiki.text);
+        return wiki.text;
     }
 
-    // 5. FALLBACK RESPONSE
+    let ddg = await fetchDuckDuckGo(q);
+    if (ddg) {
+        cache.set(q, ddg.text);
+        return ddg.text;
+    }
+
+    // 3. FALLBACK
     const fallback =
-        "Sorry, I couldn't find a reliable answer. Try SalamX, AI, Cloud Computing, CCNA, or general knowledge.";
+        "Sorry, I couldn't find a reliable answer right now. Try SalamX, AI, Cloud, or general knowledge.";
 
     cache.set(q, fallback);
-    return fallback;
-}    }
-
-    // 4. FINAL FALLBACK
-    const fallback =
-        "I couldn't find a reliable answer.\nTry asking about SalamX, AI, Cloud Computing, CCNA, or general knowledge.";
-
-    SalamXCache.set(q, fallback);
     return fallback;
 }
