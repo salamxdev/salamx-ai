@@ -1,40 +1,36 @@
 const cache = new Map();
 
 /**
- * MAIN ENGINE v4.1 (STABLE)
+ * =========================
+ * SALAMX ENGINE v2 PRO AI
+ * =========================
  */
+
 async function getAIResponse(query) {
     const q = query.toLowerCase().trim();
 
     // CACHE
-    if (cache.has(q)) return cache.get(q) + " (cached)";
+    if (cache.has(q)) return cache.get(q);
 
-    // 1. LOCAL KB (STRICT MATCH IMPROVED)
-    const local = getBestLocalMatch(q);
-    if (local) {
-        cache.set(q, local);
-        return local;
+    // 1. LOCAL KB (HIGHEST PRIORITY)
+    const kb = getLocalAnswer(q);
+    if (kb) {
+        cache.set(q, kb);
+        return kb;
     }
 
-    // 2. WIKIPEDIA (SAFE TRY)
-    const wiki = await fetchWikipedia(q);
-    if (wiki?.text) {
-        cache.set(q, wiki.text);
-        return wiki.text;
-    }
+    // 2. PARALLEL FETCH (Wikipedia + DDG)
+    const result = await Promise.race([
+        getWikipedia(q),
+        getDuckDuckGo(q),
+        timeoutFallback()
+    ]);
 
-    // 3. DUCKDUCKGO (FALLBACK)
-    const ddg = await fetchDuckDuckGo(q);
-    if (ddg?.text) {
-        cache.set(q, ddg.text);
-        return ddg.text;
-    }
+    const finalAnswer = formatResponse(q, result);
 
-    // 4. FINAL FALLBACK
-    const fallback =
-        "I couldn't find reliable information for this query. Try asking about SalamX, AI, Cloud Computing, or general knowledge.";
-
-    cache.set(q, fallback);
+    cache.set(q, finalAnswer);
+    return finalAnswer;
+}    cache.set(q, fallback);
     return fallback;
 }    return fallback;
 }
