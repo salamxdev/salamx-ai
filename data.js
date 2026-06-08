@@ -1,40 +1,76 @@
 const knowledgeBase = [
     {
-        keywords: ["salamx", "company", "salam x", "about salamx"],
-        answer: "SalamX Limited (RC 8831809) is a Nigerian technology company founded by Umar Bello Tafida. We focus on building practical digital solutions, AI tools, and a complete digital ecosystem for Africa."
+        keywords: ["salamx", "company", "about", "what is salamx", "salam x"],
+        answer: "SalamX Limited (RC 8831809) is a Nigerian technology company founded by Umar Bello Tafida. It focuses on software development, cloud computing, AI systems, and building practical digital solutions for Africa."
     },
+
     {
-        keywords: ["umar", "tafida", "founder", "ceo", "umar bello"],
-        answer: "Umar Bello Tafida is the Founder and CEO of SalamX Limited. He is a passionate technologist dedicated to African development through technology."
+        keywords: ["founder", "ceo", "umar", "tafida", "umar bello"],
+        answer: "Umar Bello Tafida is the Founder and CEO of SalamX Limited, a technology entrepreneur focused on building scalable digital systems and advancing technology access in Africa."
     },
+
     {
-        keywords: ["rc", "8831809", "registration"],
-        answer: "SalamX Limited is officially registered with the Corporate Affairs Commission (CAC) of Nigeria with RC Number 8831809."
+        keywords: ["rc", "8831809", "registration", "cac"],
+        answer: "SalamX Limited is officially registered with the Corporate Affairs Commission (CAC) of Nigeria under RC Number 8831809."
     },
+
     {
-        keywords: ["ccna", "networking", "cisco"],
-        answer: "CCNA (Cisco Certified Network Associate) is an entry-level IT certification that validates skills in networking fundamentals, IP services, security, automation, and programmability."
+        keywords: ["ccna", "cisco", "networking"],
+        answer: "CCNA (Cisco Certified Network Associate) validates foundational networking skills including routing, switching, security, and IP services."
     },
+
     {
         keywords: ["cloud", "aws", "azure", "computing"],
-        answer: "Cloud Computing is the delivery of computing services over the internet. SalamX is working on African-first cloud solutions to reduce dependency on foreign providers."
+        answer: "Cloud computing is the delivery of computing services over the internet. SalamX is developing cloud-based solutions designed for African businesses and developers."
     },
+
     {
         keywords: ["ai", "artificial intelligence", "machine learning"],
-        answer: "Artificial Intelligence (AI) is the simulation of human intelligence in machines. SalamX AI focuses on practical and accessible AI tools for African users and businesses."
+        answer: "Artificial Intelligence (AI) enables machines to simulate human intelligence. SalamX AI focuses on practical, accessible AI solutions for real-world applications."
     },
+
     {
-        keywords: ["scholarship", "study", "education", "university"],
-        answer: "Many scholarships are available for African students such as Mastercard Foundation, Chevening, Fulbright, and DAAD. I can help you with general application tips."
+        keywords: ["web", "website", "web development"],
+        answer: "Web development is the process of building websites using technologies like HTML, CSS, and JavaScript. SalamX provides professional web development services."
     },
+
     {
-        keywords: ["web development", "website"],
-        answer: "Web Development involves building websites and web applications using HTML, CSS, JavaScript, and modern frameworks. SalamX offers professional web development services."
+        keywords: ["mobile", "android", "ios", "app"],
+        answer: "Mobile app development involves creating applications for smartphones. SalamX builds scalable Android and iOS solutions."
     },
+
     {
-        keywords: ["mobile app", "android", "ios"],
-        answer: "Mobile App Development includes creating applications for Android and iOS. SalamX builds both native and cross-platform mobile solutions."
+        keywords: ["consulting", "digital transformation", "it services"],
+        answer: "SalamX provides IT consulting services to help businesses adopt digital technologies and improve operational efficiency."
     },
+
+    {
+        keywords: ["salamchat", "chat"],
+        answer: "SalamChat is a future communication platform in the SalamX ecosystem designed for secure and efficient messaging."
+    },
+
+    {
+        keywords: ["salampay", "payment"],
+        answer: "SalamPay is a future digital payment system designed to enable secure and seamless financial transactions across Africa."
+    },
+
+    {
+        keywords: ["salamos", "os", "operating system"],
+        answer: "SalamOS is a future research project aimed at building a lightweight operating system optimized for accessibility and performance."
+    },
+
+    {
+        keywords: ["mission", "vision"],
+        answer: "Mission: Deliver practical digital solutions for Africa. Vision: Build a leading technology ecosystem that drives innovation and inclusion."
+    },
+
+    {
+        keywords: ["nigeria", "africa"],
+        answer: "SalamX Limited is based in Nigeria and focuses on solving African challenges through technology and innovation."
+    }
+];
+
+console.log("SalamX AI Knowledge Base Loaded ✓");    },
     {
         keywords: ["digital transformation", "consulting"],
         answer: "Digital Transformation is the process of using digital technologies to create new business models. SalamX provides IT consulting to help African businesses transform."
