@@ -1,1 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SalamX AI Lite v1</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #10b981;
+            --dark: #0f172a;
+            --light: #f8fafc;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--light);
+            color: #333;
+        }
 
+        .hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%);
+            color: white;
+            text-align: center;
+            padding: 120px 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-container {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+        }
+
+        .chat-header {
+            background: var(--dark);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f1f5f9;
+        }
+
+        .message {
+            margin-bottom: 1.2rem;
+            max-width: 80%;
+            padding: 14px 20px;
+            border-radius: 18px;
+        }
+
+        .user {
+            margin-left: auto;
+            background: var(--primary);
+            color: white;
+            border-radius: 18px 18px 0 18px;
+        }
+
+        .ai {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .typing {
+            display: flex;
+            gap: 6px;
+            padding: 14px 20px;
+            background: white;
+            border-radius: 18px;
+            width: fit-content;
+        }
+
+        .typing span {
+            height: 8px;
+            width: 8px;
+            background: #666;
+            border-radius: 50%;
+            animation: typing 1.2s infinite;
+        }
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+        .input-area {
+            padding: 1rem;
+            background: white;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-size: 1.1rem;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Homepage -->
+    <div id="home" class="hero">
+        <div>
+            <h1 style="font-size: 3.8rem; margin-bottom: 1rem;">SalamX AI</h1>
+            <h2 style="margin-bottom: 1.5rem;">Assalamu Alaikum!</h2>
+            <p style="font-size: 1.5rem; max-width: 600px; margin: 0 auto 2rem;">
+                Welcome to SalamX AI Lite v1<br>
+                Your intelligent assistant from SalamX Limited (RC 8831809)
+            </p>
+            
+            <div id="nigeriaTime" style="font-size: 1.4rem; margin: 1.5rem 0;"></div>
+            
+            <img src="https://pbs.twimg.com/profile_images/2063380932589953025/O4isgnXh.jpg" 
+                 alt="Umar Bello Tafida" style="width: 170px; height: 170px; border-radius: 50%; border: 6px solid #10b981; margin: 2rem 0;">
+            <p><strong>Umar Bello Tafida</strong><br>Founder & CEO</p>
+
+            <button onclick="launchAI()" style="margin-top: 3rem; padding: 18px 50px; font-size: 1.4rem; background: var(--primary); border: none; border-radius: 50px; color: white; cursor: pointer;">
+                🚀 Launch SalamX AI
+            </button>
+        </div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div id="chatPage" class="chat-container">
+        <div class="chat-header">
+            <button onclick="goHome()" class="back-btn">←</button>
+            <h2>SalamX AI Lite</h2>
+        </div>
+        <div id="chatBody" class="chat-body"></div>
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Ask me anything... (e.g. What is CCNA?)" onkeypress="if(event.key === 'Enter') sendMessage()">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        // Live Nigeria Time
+        function updateNigeriaTime() {
+            const options = { timeZone: 'Africa/Lagos', hour12: true, hour: 'numeric', minute: 'numeric', second: 'numeric' };
+            document.getElementById('nigeriaTime').textContent = new Date().toLocaleTimeString('en-NG', options) + " WAT";
+        }
+        setInterval(updateNigeriaTime, 1000);
+        updateNigeriaTime();
+
+        function launchAI() {
+            document.getElementById('home').style.display = 'none';
+            document.getElementById('chatPage').style.display = 'flex';
+            addMessage("ai", "Assalamu Alaikum! I'm SalamX AI Lite v1. How can I help you today?");
+        }
+
+        function goHome() {
+            document.getElementById('chatPage').style.display = 'none';
+            document.getElementById('home').style.display = 'flex';
+        }
+
+        function addMessage(sender, text) {
+            const chatBody = document.getElementById('chatBody');
+            const msg = document.createElement('div');
+            msg.className = `message ${sender}`;
+            msg.innerHTML = `<strong>\( {sender === 'user' ? 'You' : 'SalamX AI'}:</strong><br> \){text}`;
+            chatBody.appendChild(msg);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const query = input.value.trim();
+            if (!query) return;
+
+            addMessage('user', query);
+            input.value = '';
+
+            // Typing indicator
+            const typing = document.createElement('div');
+            typing.className = 'message ai typing';
+            typing.innerHTML = `<span></span><span></span><span></span>`;
+            document.getElementById('chatBody').appendChild(typing);
+
+            const response = await getAIResponse(query);
+            typing.remove();
+            addMessage('ai', response);
+        }
+
+        async function getAIResponse(query) {
+            const q = query.toLowerCase();
+
+            // 1. Local Knowledge Base
+            for (let item of knowledgeBase) {
+                if (item.keywords.some(k => q.includes(k))) {
+                    return item.answer;
+                }
+            }
+
+            // 2. Wikipedia API
+            try {
+                const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.extract) {
+                        return data.extract.substring(0, 650) + " <br><small>(Source: Wikipedia)</small>";
+                    }
+                }
+            } catch (e) {}
+
+            // 3. DuckDuckGo Instant Answer
+            try {
+                const res = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.Abstract) {
+                        return data.Abstract + " <br><small>(Source: DuckDuckGo)</small>";
+                    }
+                }
+            } catch (e) {}
+
+            // Fallback
+            return "Sorry, I couldn't find a reliable answer right now. Try asking about SalamX, CCNA, Cloud Computing, AI, or any general topic!";
+        }
+    </script>
+</body>
+</html>
