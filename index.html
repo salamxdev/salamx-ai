@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SalamX AI Lite v2</title>
+<title>SalamX AI Lite v3</title>
 
 <style>
-:root {
+:root{
     --bg:#0b0f19;
     --panel:#111827;
     --text:#e5e7eb;
@@ -35,6 +35,301 @@ body{
 .sidebar h2{
     padding:15px;
     border-bottom:1px solid #1f2937;
+}
+
+.btn{
+    margin:8px;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:var(--primary);
+}
+
+.chat-list{
+    flex:1;
+    overflow:auto;
+    padding:10px;
+}
+
+.chat-item{
+    padding:10px;
+    margin-bottom:8px;
+    background:#0f172a;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13px;
+}
+
+/* MAIN */
+.main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+/* CHAT */
+.chat-body{
+    flex:1;
+    padding:20px;
+    overflow:auto;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.message{
+    padding:12px;
+    border-radius:10px;
+    max-width:70%;
+    line-height:1.5;
+    white-space:pre-wrap;
+}
+
+.user{
+    align-self:flex-end;
+    background:var(--primary);
+    color:#000;
+}
+
+.ai{
+    align-self:flex-start;
+    background:var(--panel);
+    border:1px solid #1f2937;
+}
+
+/* INPUT */
+.input-area{
+    display:flex;
+    padding:10px;
+    border-top:1px solid #1f2937;
+    background:var(--panel);
+    gap:8px;
+}
+
+input{
+    flex:1;
+    padding:12px;
+    border-radius:8px;
+    border:1px solid #1f2937;
+    background:#0f172a;
+    color:var(--text);
+}
+
+button{
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:var(--primary);
+    cursor:pointer;
+}
+
+/* STREAMING CURSOR */
+.cursor{
+    display:inline-block;
+    width:8px;
+    height:14px;
+    background:var(--muted);
+    animation:blink 1s infinite;
+}
+
+@keyframes blink{
+    50%{opacity:0;}
+}
+</style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <h2>SalamX AI</h2>
+
+    <button class="btn" onclick="newChat()">+ New Chat</button>
+    <button class="btn" onclick="exportChat()">Export Chat</button>
+    <button class="btn" onclick="startVoice()">🎙️ Voice</button>
+
+    <div id="chatList" class="chat-list"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <div id="chatBody" class="chat-body"></div>
+
+    <div class="input-area">
+        <input id="input" placeholder="Ask SalamX AI..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+</div>
+
+<script src="data.js"></script>
+
+<script>
+
+let chats = JSON.parse(localStorage.getItem("salamx_chats") || "[]");
+let currentChat = null;
+
+/* INIT */
+function init(){
+    if(chats.length===0) newChat();
+    else loadChat(chats[0].id);
+    renderList();
+}
+init();
+
+/* NEW CHAT */
+function newChat(){
+    const chat={id:Date.now(),messages:[]};
+    chats.push(chat);
+    currentChat=chat;
+    save();
+    renderList();
+    renderMessages();
+}
+
+/* SAVE */
+function save(){
+    localStorage.setItem("salamx_chats",JSON.stringify(chats));
+}
+
+/* LIST */
+function renderList(){
+    const list=document.getElementById("chatList");
+    list.innerHTML="";
+    chats.forEach(c=>{
+        const div=document.createElement("div");
+        div.className="chat-item";
+        div.innerText="Chat "+new Date(c.id).toLocaleString();
+        div.onclick=()=>loadChat(c.id);
+        list.appendChild(div);
+    });
+}
+
+/* LOAD */
+function loadChat(id){
+    currentChat=chats.find(c=>c.id===id);
+    renderMessages();
+}
+
+/* MESSAGES */
+function renderMessages(){
+    const box=document.getElementById("chatBody");
+    box.innerHTML="";
+    currentChat.messages.forEach(m=>{
+        draw(m.role,m.text);
+    });
+}
+
+function draw(role,text){
+    const box=document.getElementById("chatBody");
+    const div=document.createElement("div");
+    div.className="message "+role;
+    div.innerHTML=text;
+    box.appendChild(div);
+    box.scrollTop=box.scrollHeight;
+}
+
+/* STREAM AI RESPONSE */
+async function streamText(text,callback){
+    let out="";
+    for(let i=0;i<text.length;i++){
+        out+=text[i];
+        callback(out);
+        await new Promise(r=>setTimeout(r,15));
+    }
+}
+
+/* SEND */
+async function sendMessage(){
+    const input=document.getElementById("input");
+    const text=input.value.trim();
+    if(!text)return;
+
+    draw("user",text);
+    currentChat.messages.push({role:"user",text});
+    save();
+
+    input.value="";
+
+    const aiBox=document.createElement("div");
+    aiBox.className="message ai";
+    document.getElementById("chatBody").appendChild(aiBox);
+
+    const reply=await getAI(text);
+
+    await streamText(reply,(t)=>{
+        aiBox.innerHTML=t+"<span class='cursor'></span>";
+    });
+
+    aiBox.innerHTML=reply;
+
+    currentChat.messages.push({role:"ai",text:reply});
+    save();
+}
+
+/* AI ENGINE */
+async function getAI(q){
+    const query=q.toLowerCase();
+
+    for(let i of knowledgeBase){
+        if(i.keywords.some(k=>query.includes(k))){
+            return format(i.answer);
+        }
+    }
+
+    try{
+        const wiki=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${q.replace(/\s+/g,"_")}`);
+        const d=await wiki.json();
+        if(d.extract) return format(d.extract);
+    }catch{}
+
+    try{
+        const dd=await fetch(`https://api.duckduckgo.com/?q=${q}&format=json`);
+        const j=await dd.json();
+        if(j.Abstract) return format(j.Abstract);
+    }catch{}
+
+    return "Sorry, I couldn't find an answer.";
+}
+
+/* SIMPLE MARKDOWN */
+function format(text){
+    return text
+    .replace(/\*\*(.*?)\*\*/g,"<b>$1</b>")
+    .replace(/\n/g,"<br>");
+}
+
+/* EXPORT CHAT */
+function exportChat(){
+    const data=JSON.stringify(currentChat.messages,null,2);
+    const blob=new Blob([data],{type:"text/plain"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="salamx_chat.txt";
+    a.click();
+}
+
+/* VOICE INPUT */
+function startVoice(){
+    const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!Speech){alert("Not supported");return;}
+
+    const rec=new Speech();
+    rec.lang="en-US";
+
+    rec.onresult=(e)=>{
+        document.getElementById("input").value=e.results[0][0].transcript;
+    };
+
+    rec.start();
+}
+
+</script>
+
+</body>
+</html>    border-bottom:1px solid #1f2937;
 }
 
 .new-chat{
