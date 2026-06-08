@@ -1,40 +1,44 @@
-const SalamXCache = new Map();
+const cache = new Map();
 
 /**
- * MAIN AI ENGINE v2
+ * MAIN ENGINE v3 (ALL-IN-ONE)
  */
 async function getAIResponse(query) {
     const q = query.toLowerCase().trim();
 
-    // 0. CACHE CHECK (FAST LAYER ⚡)
-    if (SalamXCache.has(q)) {
-        return SalamXCache.get(q) + " (cached)";
+    // 1. CACHE (FASTEST LAYER)
+    if (cache.has(q)) {
+        return cache.get(q) + " (cached)";
     }
 
-    // 1. LOCAL KNOWLEDGE BASE (HIGHEST PRIORITY)
-    if (typeof knowledgeBase !== "undefined") {
-        for (let item of knowledgeBase) {
-            if (item.keywords.some(k => q.includes(k))) {
-                const result = item.answer;
-                SalamXCache.set(q, result);
-                return result;
-            }
-        }
+    // 2. LOCAL KNOWLEDGE BASE (OFFLINE INTELLIGENCE)
+    const local = getLocalAnswer(q);
+    if (local) {
+        cache.set(q, local);
+        return local;
     }
 
-    // 2. WIKIPEDIA API (PRIMARY LIVE SOURCE)
-    const wikiResult = await fetchWikipedia(q);
-    if (wikiResult) {
-        SalamXCache.set(q, wikiResult);
-        return wikiResult;
+    // 3. RUN APIs IN PARALLEL (WIKIPEDIA + DUCKDUCKGO)
+    const result = await Promise.race([
+        fetchWikipedia(q),
+        fetchDuckDuckGo(q),
+        timeout(4000)
+    ]);
+
+    // 4. VALID RESPONSE CHECK
+    if (result && result.text) {
+        const finalText = result.text + `\n\nConfidence: ${result.confidence}%`;
+        cache.set(q, finalText);
+        return finalText;
     }
 
-    // 3. DUCKDUCKGO API (SECONDARY SOURCE)
-    const ddgResult = await fetchDuckDuckGo(q);
-    if (ddgResult) {
-        SalamXCache.set(q, ddgResult);
-        return ddgResult;
-    }
+    // 5. FALLBACK RESPONSE
+    const fallback =
+        "Sorry, I couldn't find a reliable answer. Try SalamX, AI, Cloud Computing, CCNA, or general knowledge.";
+
+    cache.set(q, fallback);
+    return fallback;
+}    }
 
     // 4. FINAL FALLBACK
     const fallback =
